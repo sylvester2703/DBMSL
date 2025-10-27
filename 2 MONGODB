@@ -1,0 +1,40 @@
+In the left panel, create a new database:
+Database name: Assignment_4
+Collection name: students
+use Assignment_4
+db.students.drop()
+db.students.insertOne({roll:1,name:&quot;Asha
+Patil&quot;,age:20,course:&quot;AI&amp;DS&quot;,scores:{math:85,physics:78,cs:92},skills:[&quot;Python&quot;,&quot;C++&quot;,&quot;AI&quot;],acti
+ve:true})
+db.students.insertMany([{roll:2,name:&quot;Rohit
+Sharma&quot;,age:21,course:&quot;AI&amp;DS&quot;,scores:{math:75,physics:80,cs:88},skills:[&quot;Java&quot;,&quot;ML&quot;],active:tr
+ue},{roll:3,name:&quot;Neha Joshi&quot;,age:19,course:&quot;Computer
+Networks&quot;,scores:{math:90,physics:70,cs:95},skills:[&quot;Networking&quot;,&quot;Python&quot;],active:false},{roll:5,n
+ame:&quot;Samir Khan&quot;,age:22,course:&quot;Data
+Science&quot;,scores:{math:82,physics:76,cs:89},skills:[],active:true}])
+db.students.find().pretty()
+db.students.find({age:{$gt:19}}).pretty()
+db.students.find({$and:[{age:{$gt:19}},{active:true}]}).pretty()
+db.students.find({$or:[{course:&quot;AI&amp;DS&quot;},{course:&quot;Data Science&quot;}]}).pretty()
+db.students.find({active:{$not:{$eq:true}}}).pretty()
+db.students.find({$nor:[{course:&quot;AI&amp;DS&quot;},{active:false}]}).pretty()
+db.students.find({course:{$in:[&quot;AI&amp;DS&quot;,&quot;Data Science&quot;]}}).pretty()
+db.students.find({skills:{$exists:true,$ne:[]}}).pretty()
+db.students.find({},{name:1,course:1,_id:0}).pretty()
+db.students.find().sort({age:-1}).limit(2).pretty()
+db.students.countDocuments()
+db.students.updateOne({roll:3},{$set:{course:&quot;AI &amp; Data Science&quot;}})
+db.students.updateMany({active:true},{$inc:{age:1}})
+db.students.updateOne({roll:2},{$push:{skills:&quot;DataStructures&quot;}})
+db.students.updateOne({roll:1},{$pull:{skills:&quot;C++&quot;}})
+db.students.save({roll:4,name:&quot;Kiran Desai&quot;,age:22,course:&quot;Cyber
+Security&quot;,scores:{math:88,physics:85,cs:90},skills:[&quot;Python&quot;,&quot;Security&quot;],active:true})
+let
+doc=db.students.findOne({roll:1});doc.age=doc.age+2;doc.scores.cs=95;db.students.save(doc)
+db.students.insertOne({roll:6,name:&quot;Raj
+Patil&quot;,age:20,course:&quot;AI&amp;DS&quot;,scores:{math:80,physics:77,cs:85},skills:[&quot;Python&quot;],active:true})
+db.students.deleteOne({roll:5})
+db.students.deleteMany({active:false})
+db.students.find().pretty()
+db.students.find({$and:[{course:{$in:[&quot;AI&amp;DS&quot;,&quot;AI &amp; Data Science&quot;,&quot;Data Science&quot;,&quot;Cyber
+Security&quot;]}},{age:{$gte:20,$lte:24}}]}).pretty()
