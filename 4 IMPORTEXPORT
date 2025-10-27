@@ -1,0 +1,45 @@
+drop database test3;
+CREATE DATABASE test3;
+USE test3;
+-- create and populate original table
+DROP TABLE IF EXISTS students;
+CREATE TABLE students (
+id INT PRIMARY KEY,
+name VARCHAR(50),
+age INT,
+course VARCHAR(50)
+);
+TRUNCATE TABLE students;
+INSERT INTO students (id, name, age, course) VALUES
+(1, &#39;Alice&#39;, 20, &#39;AI &amp; DS&#39;),
+(2, &#39;Bob&#39;, 21, &#39;CS&#39;),
+(3, &#39;Charlie&#39;, 19, &#39;IT&#39;);
+-- export CSV and TXT to MySQL Uploads folder
+SELECT *
+INTO OUTFILE &#39;C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\students.csv&#39;
+FIELDS TERMINATED BY &#39;,&#39; ENCLOSED BY &#39;&quot;&#39; LINES TERMINATED BY &#39;\n&#39;
+FROM students;
+SELECT *
+INTO OUTFILE &#39;C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\students.txt&#39;
+FIELDS TERMINATED BY &#39;\t&#39; LINES TERMINATED BY &#39;\r\n&#39;
+FROM students;
+-- import CSV into students_import_csv
+DROP TABLE IF EXISTS students_import_csv;
+CREATE TABLE students_import_csv LIKE students;
+LOAD DATA INFILE &#39;C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\students.csv&#39;
+INTO TABLE students_import_csv
+FIELDS TERMINATED BY &#39;,&#39; ENCLOSED BY &#39;&quot;&#39; LINES TERMINATED BY &#39;\n&#39;;
+-- import TXT into students_import_txt
+DROP TABLE IF EXISTS students_import_txt;
+CREATE TABLE students_import_txt LIKE students;
+LOAD DATA INFILE &#39;C:\\ProgramData\\MySQL\\MySQL Server 8.0\\Uploads\\students.txt&#39;
+INTO TABLE students_import_txt
+FIELDS TERMINATED BY &#39;\t&#39; LINES TERMINATED BY &#39;\r\n&#39;;
+-- verification outputs (counts and sample rows)
+
+SELECT &#39;count_original&#39; AS what, COUNT(*) AS cnt FROM students;
+SELECT &#39;count_import_csv&#39; AS what, COUNT(*) AS cnt FROM students_import_csv;
+SELECT &#39;count_import_txt&#39; AS what, COUNT(*) AS cnt FROM students_import_txt;
+SELECT &#39;original_rows&#39; AS which; SELECT * FROM students;
+SELECT &#39;import_csv_rows&#39; AS which; SELECT * FROM students_import_csv;
+SELECT &#39;import_txt_rows&#39; AS which; SELECT * FROM students_import_txt;
