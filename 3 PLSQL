@@ -1,0 +1,88 @@
+-- 1. Create database and use it
+CREATE DATABASE IF NOT EXISTS plsql;
+USE plsql;
+-- 2. Drop tables if they exist
+DROP TABLE IF EXISTS FINE;
+DROP TABLE IF EXISTS BORROWER;
+-- 3. Create BORROWER table
+CREATE TABLE BORROWER (
+roll_no INT PRIMARY KEY,
+name VARCHAR(50),
+date_of_issue DATE,
+name_of_book VARCHAR(50),
+status CHAR(1)
+);
+-- 4. Insert sample data
+INSERT INTO BORROWER (roll_no, name, date_of_issue, name_of_book, status) VALUES
+(1, &#39;SWARAJ&#39;, &#39;2025-02-09&#39;, &#39;AI&#39;, &#39;R&#39;),
+(2, &#39;SYLVESTER&#39;, &#39;2025-09-01&#39;, &#39;HCI&#39;, &#39;I&#39;),
+(3, &#39;NIDHI&#39;, &#39;2025-07-08&#39;, &#39;DBMS&#39;, &#39;I&#39;),
+(4, &#39;ATHARVA&#39;, &#39;2025-08-21&#39;, &#39;WT&#39;, &#39;I&#39;),
+(5, &#39;AVANI&#39;, &#39;2025-09-06&#39;, &#39;SQL&#39;, &#39;I&#39;);
+-- 5. Create FINE table
+CREATE TABLE FINE (
+roll_no INT NOT NULL,
+fine_date DATE,
+AMT INT,
+FOREIGN KEY (roll_no) REFERENCES BORROWER(roll_no)
+);
+-- 6. Create procedure
+DELIMITER //
+DROP PROCEDURE IF EXISTS RETURN_BOOK;
+CREATE PROCEDURE RETURN_BOOK(IN ROLL INT, IN B_NAME VARCHAR(50))
+BEGIN
+DECLARE L_DATE DATE;
+DECLARE FIN INT DEFAULT 0;
+DECLARE DAYS INT DEFAULT 0;
+DECLARE BOOK_STATUS CHAR(1);
+
+-- Error handler
+DECLARE EXIT HANDLER FOR SQLEXCEPTION
+BEGIN
+SELECT &#39;Error: Unable to process return. Please check input or database.&#39; AS
+ERROR_MESSAGE;
+ROLLBACK;
+END;
+-- Get issue date and status
+SELECT date_of_issue, status
+INTO L_DATE, BOOK_STATUS
+FROM BORROWER
+WHERE roll_no = ROLL AND name_of_book = B_NAME;
+-- Check if book exists
+IF BOOK_STATUS IS NULL THEN
+SIGNAL SQLSTATE &#39;45000&#39;
+SET MESSAGE_TEXT = &#39;No matching issued book found for given roll number and book
+name.&#39;;
+END IF;
+-- Check if already returned
+IF BOOK_STATUS = &#39;R&#39; THEN
+SIGNAL SQLSTATE &#39;45000&#39;
+SET MESSAGE_TEXT = &#39;Book already returned.&#39;;
+END IF;
+-- Calculate fine
+SET DAYS = DATEDIFF(CURDATE(), L_DATE);
+IF DAYS &gt; 15 AND DAYS &lt;= 30 THEN
+SET FIN = (DAYS - 15) * 5;
+ELSEIF DAYS &gt; 30 THEN
+SET FIN = (15 * 5) + ((DAYS - 30) * 50);
+ELSE
+SET FIN = 0;
+END IF;
+-- Update book status
+UPDATE BORROWER
+SET status = &#39;R&#39;
+WHERE roll_no = ROLL AND name_of_book = B_NAME;
+
+-- Insert fine if any
+IF FIN &gt; 0 THEN
+INSERT INTO FINE(roll_no, fine_date, AMT)
+VALUES (ROLL, CURDATE(), FIN);
+END IF;
+-- Return result
+SELECT DAYS AS Days_Borrowed, FIN AS Fine_Amount, &#39;Book Returned Successfully&#39; AS
+Status_Message;
+END //
+DELIMITER ;
+-- 7. Call procedure
+CALL RETURN_BOOK(2, &#39;HCI&#39;);
+CALL RETURN_BOOK(3, &#39;DBMS&#39;);
