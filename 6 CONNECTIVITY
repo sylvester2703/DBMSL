@@ -1,0 +1,118 @@
+Jupyter LIbrary
+import mysql.connector
+
+mydb = mysql.connector.connect(
+    host="localhost",        # Your MySQL host (default: localhost)
+    user="root",             # Your MySQL username
+    password="your_password",# Replace with your MySQL password
+    database="college_db"    # Replace with your database name
+)
+
+if mydb.is_connected():
+    print("Connection successful!")
+
+cursor = mydb.cursor()
+cursor.execute("SHOW DATABASES;")
+for db in cursor:
+    print(db)
+
+
+
+Mysql:-
+-- 1. Create database
+CREATE DATABASE IF NOT EXISTS student_db;
+-- 2. Use the database
+USE student_db;
+-- 3. Create table
+DROP TABLE IF EXISTS students;
+CREATE TABLE students (
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(50),
+age INT,
+course VARCHAR(50)
+);
+-- 4. Insert sample data
+INSERT INTO students (name, age, course) VALUES
+(&#39;Alice&#39;, 20, &#39;AI &amp; DS&#39;),
+(&#39;Bob&#39;, 21, &#39;CS&#39;),
+(&#39;Charlie&#39;, 19, &#39;IT&#39;);
+-- 5. Verify data
+SELECT * FROM students;
+
+Python:-
+import mysql.connector
+# 1. Connect to MySQL
+conn = mysql.connector.connect(
+host=&quot;localhost&quot;,
+user=&quot;root&quot;, # your MySQL username
+password=&quot;root&quot;, # your MySQL password
+database=&quot;student_db&quot;
+)
+cursor = conn.cursor()
+# 2. Create table if not exists (optional, ensures table exists)
+cursor.execute(&quot;&quot;&quot;
+CREATE TABLE IF NOT EXISTS students (
+id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(50),
+age INT,
+
+course VARCHAR(50)
+)
+&quot;&quot;&quot;)
+conn.commit()
+# 3. CRUD operation functions
+def add_student():
+name = input(&quot;Enter Name: &quot;)
+age = int(input(&quot;Enter Age: &quot;))
+course = input(&quot;Enter Course: &quot;)
+cursor.execute(&quot;INSERT INTO students (name, age, course) VALUES (%s,%s,%s)&quot;, (name,
+age, course))
+conn.commit()
+print(&quot;✅ Student added.&quot;)
+def view_students():
+cursor.execute(&quot;SELECT * FROM students&quot;)
+rows = cursor.fetchall()
+print(&quot;\nID | Name | Age | Course&quot;)
+print(&quot;------------------------&quot;)
+for row in rows:
+print(row)
+def edit_student():
+student_id = int(input(&quot;Enter ID to edit: &quot;))
+name = input(&quot;Enter new Name: &quot;)
+age = int(input(&quot;Enter new Age: &quot;))
+course = input(&quot;Enter new Course: &quot;)
+cursor.execute(&quot;UPDATE students SET name=%s, age=%s, course=%s WHERE id=%s&quot;,
+(name, age, course, student_id))
+conn.commit()
+print(&quot;✅ Student updated.&quot;)
+def delete_student():
+student_id = int(input(&quot;Enter ID to delete: &quot;))
+cursor.execute(&quot;DELETE FROM students WHERE id=%s&quot;, (student_id,))
+conn.commit()
+print(&quot;✅ Student deleted.&quot;)
+# 4. Menu-driven interface
+while True:
+print(&quot;\n--- Student Management ---&quot;)
+print(&quot;1. Add Student&quot;)
+print(&quot;2. View Students&quot;)
+
+print(&quot;3. Edit Student&quot;)
+print(&quot;4. Delete Student&quot;)
+print(&quot;5. Exit&quot;)
+choice = input(&quot;Enter your choice: &quot;)
+if choice == &#39;1&#39;:
+add_student()
+elif choice == &#39;2&#39;:
+view_students()
+elif choice == &#39;3&#39;:
+edit_student()
+elif choice == &#39;4&#39;:
+delete_student()
+elif choice == &#39;5&#39;:
+print(&quot;Exiting program.&quot;)
+break
+else:
+print(&quot;❌ Invalid choice. Try again.&quot;)
+# 5. Close connection
+cursor.close()
+conn.close()
