@@ -1,0 +1,79 @@
+DROP DATABASE IF EXISTS college_db;
+CREATE DATABASE college_db;
+USE college_db;
+CREATE TABLE courses(
+course_id INT PRIMARY KEY AUTO_INCREMENT,
+course_name VARCHAR(50) NOT NULL UNIQUE,
+duration VARCHAR(20)
+);
+CREATE TABLE students(
+student_id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(50) NOT NULL,
+age INT,
+course_id INT,
+CONSTRAINT fk_course FOREIGN KEY(course_id) REFERENCES courses(course_id) ON
+DELETE CASCADE
+);
+CREATE TABLE enrollment(
+enroll_id INT PRIMARY KEY AUTO_INCREMENT,
+student_id INT,
+course_id INT,
+enroll_date DATE,
+CONSTRAINT fk_student FOREIGN KEY(student_id) REFERENCES students(student_id)
+ON DELETE CASCADE,
+CONSTRAINT fk_enroll_course FOREIGN KEY(course_id) REFERENCES
+courses(course_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_student_name ON students(name);
+INSERT INTO courses(course_name,duration) VALUES
+(&#39;AI &amp; DS&#39;,&#39;2 Years&#39;),
+(&#39;Computer Science&#39;,&#39;4 Years&#39;),
+(&#39;Information Technology&#39;,&#39;4 Years&#39;);
+INSERT INTO students(name,age,course_id) VALUES
+(&#39;Alice&#39;,20,1),
+(&#39;Bob&#39;,21,2),
+(&#39;Charlie&#39;,19,3),
+(&#39;David&#39;,22,1),
+(&#39;Eve&#39;,23,2);
+
+INSERT INTO enrollment(student_id,course_id,enroll_date) VALUES
+(1,1,&#39;2025-01-15&#39;),
+(2,2,&#39;2025-01-16&#39;),
+(3,3,&#39;2025-01-17&#39;),
+(4,1,&#39;2025-01-18&#39;),
+(5,2,&#39;2025-01-19&#39;);
+SELECT * FROM students WHERE age&gt;=21;
+SELECT name,UPPER(name) AS upper_name,LENGTH(name) AS name_length FROM
+students;
+INSERT INTO students(name,age,course_id) VALUES(&#39;Frank&#39;,24,3);
+UPDATE students SET age=age+1 WHERE name=&#39;Alice&#39;;
+DELETE FROM students WHERE name=&#39;Charlie&#39;;
+SELECT * FROM students ORDER BY age DESC;
+SELECT course_id,COUNT(*) AS total_students FROM students GROUP BY course_id;
+SELECT DISTINCT course_id FROM students;
+SELECT * FROM students WHERE age BETWEEN 20 AND 23;
+SELECT name FROM students WHERE course_id=1 UNION SELECT name FROM students
+WHERE course_id=2;
+SELECT s.name,c.course_name FROM students s INNER JOIN courses c ON
+s.course_id=c.course_id;
+SELECT s.name,c.course_name FROM students s LEFT JOIN courses c ON
+s.course_id=c.course_id;
+SELECT s.name,c.course_name FROM students s RIGHT JOIN courses c ON
+s.course_id=c.course_id;
+SELECT s.name,c.course_name FROM students s LEFT JOIN courses c ON
+s.course_id=c.course_id
+UNION
+SELECT s.name,c.course_name FROM students s RIGHT JOIN courses c ON
+s.course_id=c.course_id;
+SELECT a.name AS student1,b.name AS student2,a.course_id FROM students a,students b
+WHERE a.course_id=b.course_id AND a.student_id&lt;b.student_id;
+SELECT * FROM students WHERE course_id=(SELECT course_id FROM courses WHERE
+course_name=&#39;AI &amp; DS&#39;);
+SELECT * FROM students WHERE course_id IN (SELECT course_id FROM courses WHERE
+duration=&#39;4 Years&#39;);
+SELECT * FROM students s WHERE EXISTS (SELECT * FROM enrollment e WHERE
+s.student_id=e.student_id);
+CREATE OR REPLACE VIEW student_course_view AS SELECT s.name,c.course_name,s.age
+FROM students s INNER JOIN courses c ON s.course_id=c.course_id;
+SELECT * FROM student_course_view;
+SELECT * FROM students WHERE name=&#39;Alice&#39;;
