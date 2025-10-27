@@ -1,0 +1,80 @@
+DROP DATABASE IF EXISTS dbmsassignsylv7;
+CREATE DATABASE dbmsassignsylv7;
+USE dbmsassignsylv7;
+CREATE TABLE A_RollCall(name VARCHAR(500), roll INT, class VARCHAR(500));
+INSERT INTO A_RollCall VALUES
+(&#39;Sylvester&#39;,1,&#39;AIDS 1&#39;),
+(&#39;Nidhi&#39;,2,&#39;AIDS 2&#39;),
+(&#39;Hemant&#39;,3,&#39;AIDS 3&#39;),
+(&#39;Avani&#39;,4,&#39;AIDS 1&#39;),
+(&#39;Swaraj&#39;,5,&#39;AIDS 2&#39;);
+SELECT * FROM A_RollCall;
+CREATE TABLE B_RollCall(name VARCHAR(500), roll INT, class VARCHAR(500));
+INSERT INTO B_RollCall VALUES
+(&#39;Sylvester&#39;,1,&#39;AIDS 1&#39;),
+(&#39;Nidhi&#39;,2,&#39;AIDS 2&#39;),
+(&#39;Hemant&#39;,3,&#39;AIDS 3&#39;),
+(&#39;Avani&#39;,4,&#39;AIDS 1&#39;),
+(&#39;Swaraj&#39;,5,&#39;AIDS 2&#39;),
+(&#39;Vedika&#39;,6,&#39;AIDS 3&#39;),
+(&#39;Rhuturaj&#39;,7,&#39;AIDS 2&#39;);
+SELECT * FROM B_RollCall;
+CREATE TABLE O_RollCall(name VARCHAR(500), roll INT, class VARCHAR(500));
+DELIMITER $$
+CREATE PROCEDURE copy_missing_students()
+BEGIN
+DECLARE done INT DEFAULT 0;
+DECLARE p_name VARCHAR(255);
+DECLARE p_rollno INT;
+DECLARE p_class VARCHAR(255);
+DECLARE cc1 CURSOR FOR SELECT name, roll, class FROM B_RollCall WHERE roll NOT
+IN (SELECT roll FROM O_RollCall);
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+OPEN cc1;
+read_loop: LOOP
+FETCH cc1 INTO p_name, p_rollno, p_class;
+IF done THEN LEAVE read_loop; END IF;
+INSERT INTO O_RollCall VALUES (p_name, p_rollno, p_class);
+SELECT CONCAT(&#39;Inserted: &#39;, p_name, &#39; | Roll: &#39;, p_rollno, &#39; | Class: &#39;, p_class) AS
+inserted_record;
+END LOOP;
+
+CLOSE cc1;
+END$$
+DELIMITER ;
+CALL copy_missing_students();
+SELECT * FROM O_RollCall;
+DELIMITER $$
+CREATE PROCEDURE show_rolls_greater_than(IN roll1 INT)
+BEGIN
+DECLARE done INT DEFAULT 0;
+DECLARE p_name VARCHAR(255);
+DECLARE p_rollno INT;
+DECLARE p_class VARCHAR(255);
+DECLARE pp1 CURSOR FOR SELECT name, roll, class FROM B_RollCall WHERE roll &gt; roll1;
+DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+OPEN pp1;
+read_loop: LOOP
+FETCH pp1 INTO p_name, p_rollno, p_class;
+IF done THEN LEAVE read_loop; END IF;
+SELECT CONCAT(&#39;Student: &#39;, p_name, &#39; | Roll: &#39;, p_rollno, &#39; | Class: &#39;, p_class) AS record;
+END LOOP;
+CLOSE pp1;
+END$$
+DELIMITER ;
+CALL show_rolls_greater_than(3);
+DELIMITER $$
+CREATE PROCEDURE increment_rolls()
+BEGIN
+DECLARE total_rows INT;
+UPDATE B_RollCall SET roll = roll + 1 WHERE roll &gt; 0;
+SET total_rows = ROW_COUNT();
+IF total_rows = 0 THEN
+SELECT &#39;No roll was updated&#39; AS message;
+ELSE
+SELECT CONCAT(total_rows, &#39; roll calls were affected&#39;) AS message;
+END IF;
+END$$
+DELIMITER ;
+CALL increment_rolls();
+SELECT * FROM B_RollCall;
