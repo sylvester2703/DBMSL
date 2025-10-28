@@ -1,0 +1,209 @@
+DROP DATABASE IF EXISTS college_db;
+CREATE DATABASE college_db;
+USE college_db;
+CREATE TABLE courses(
+course_id INT PRIMARY KEY AUTO_INCREMENT,
+course_name VARCHAR(50) NOT NULL UNIQUE,
+duration VARCHAR(20)
+);
+CREATE TABLE students(
+student_id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(50) NOT NULL,
+age INT,
+course_id INT,
+CONSTRAINT fk_course FOREIGN KEY(course_id) REFERENCES courses(course_id) ON
+DELETE CASCADE
+);
+CREATE TABLE enrollment(
+enroll_id INT PRIMARY KEY AUTO_INCREMENT,
+student_id INT,
+course_id INT,
+enroll_date DATE,
+CONSTRAINT fk_student FOREIGN KEY(student_id) REFERENCES students(student_id)
+ON DELETE CASCADE,
+CONSTRAINT fk_enroll_course FOREIGN KEY(course_id) REFERENCES
+courses(course_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_student_name ON students(name);
+INSERT INTO courses(course_name,duration) VALUES
+(&#39;AI &amp; DS&#39;,&#39;2 Years&#39;),
+(&#39;Computer Science&#39;,&#39;4 Years&#39;),
+(&#39;Information Technology&#39;,&#39;4 Years&#39;);
+INSERT INTO students(name,age,course_id) VALUES
+(&#39;Alice&#39;,20,1),
+(&#39;Bob&#39;,21,2),
+(&#39;Charlie&#39;,19,3),
+(&#39;David&#39;,22,1),
+(&#39;Eve&#39;,23,2);
+
+INSERT INTO enrollment(student_id,course_id,enroll_date) VALUES
+(1,1,&#39;2025-01-15&#39;),
+(2,2,&#39;2025-01-16&#39;),
+(3,3,&#39;2025-01-17&#39;),
+(4,1,&#39;2025-01-18&#39;),
+(5,2,&#39;2025-01-19&#39;);
+SELECT * FROM students WHERE age&gt;=21;
+SELECT name,UPPER(name) AS upper_name,LENGTH(name) AS name_length FROM
+students;
+INSERT INTO students(name,age,course_id) VALUES(&#39;Frank&#39;,24,3);
+UPDATE students SET age=age+1 WHERE name=&#39;Alice&#39;;
+DELETE FROM students WHERE name=&#39;Charlie&#39;;
+SELECT * FROM students ORDER BY age DESC;
+SELECT course_id,COUNT(*) AS total_students FROM students GROUP BY course_id;
+SELECT DISTINCT course_id FROM students;
+SELECT * FROM students WHERE age BETWEEN 20 AND 23;
+SELECT name FROM students WHERE course_id=1 UNION SELECT name FROM students
+WHERE course_id=2;
+SELECT s.name,c.course_name FROM students s INNER JOIN courses c ON
+s.course_id=c.course_id;
+SELECT s.name,c.course_name FROM students s LEFT JOIN courses c ON
+s.course_id=c.course_id;
+SELECT s.name,c.course_name FROM students s RIGHT JOIN courses c ON
+s.course_id=c.course_id;
+SELECT s.name,c.course_name FROM students s LEFT JOIN courses c ON
+s.course_id=c.course_id
+UNION
+SELECT s.name,c.course_name FROM students s RIGHT JOIN courses c ON
+s.course_id=c.course_id;
+SELECT a.name AS student1,b.name AS student2,a.course_id FROM students a,students b
+WHERE a.course_id=b.course_id AND a.student_id&lt;b.student_id;
+SELECT * FROM students WHERE course_id=(SELECT course_id FROM courses WHERE
+course_name=&#39;AI &amp; DS&#39;);
+SELECT * FROM students WHERE course_id IN (SELECT course_id FROM courses WHERE
+duration=&#39;4 Years&#39;);
+SELECT * FROM students s WHERE EXISTS (SELECT * FROM enrollment e WHERE
+s.student_id=e.student_id);
+CREATE OR REPLACE VIEW student_course_view AS SELECT s.name,c.course_name,s.age
+FROM students s INNER JOIN courses c ON s.course_id=c.course_id;
+SELECT * FROM student_course_view;
+SELECT * FROM students WHERE name=&#39;Alice&#39;;
+
+
+
+“ “ “
+DROP DATABASE IF EXISTS college_db;
+CREATE DATABASE college_db;
+USE college_db;
+CREATE TABLE courses(
+course_id INT PRIMARY KEY AUTO_INCREMENT,
+course_name VARCHAR(50) NOT NULL UNIQUE,
+duration VARCHAR(20),
+fees DECIMAL(10,2)
+);
+CREATE TABLE students(
+student_id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(50) NOT NULL,
+age INT CHECK(age>0),
+course_id INT,
+marks INT,
+CONSTRAINT fk_course FOREIGN KEY(course_id) REFERENCES courses(course_id)
+);
+CREATE INDEX idx_student_name ON students(name);
+CREATE VIEW v_student_course AS
+SELECT s.student_id,s.name,s.age,c.course_name,c.duration,s.marks
+FROM students s JOIN courses c ON s.course_id=c.course_id;
+CREATE VIEW course_alias AS SELECT * FROM courses;
+INSERT INTO courses(course_name,duration,fees) VALUES
+('Artificial Intelligence','6 months',15000),
+('Data Science','8 months',18000),
+('Web Development','5 months',12000);
+INSERT INTO students(name,age,course_id,marks) VALUES
+('Asha Patil',20,1,85),
+('Rohit More',21,2,78),
+('Sneha Khan',19,3,92),
+('Karan Patil',20,1,67),
+('Meera Joshi',22,2,88);
+SELECT * FROM students;
+SELECT * FROM courses;
+SELECT * FROM v_student_course;
+SELECT name,marks FROM students WHERE marks>80;
+SELECT UPPER(name) AS student_name FROM students;
+SELECT AVG(marks) AS avg_marks FROM students;
+UPDATE students s
+JOIN courses c ON s.course_id=c.course_id
+SET s.marks=s.marks+5
+WHERE c.course_name='Artificial Intelligence';
+DELETE FROM students WHERE marks<70;
+SELECT c.course_name,COUNT(s.student_id) AS total_students
+FROM courses c LEFT JOIN students s ON c.course_id=s.course_id
+GROUP BY c.course_name;
+SELECT name,marks FROM students ORDER BY marks DESC;
+SELECT name FROM students WHERE name LIKE 'S%';
+SELECT name,marks FROM students WHERE marks BETWEEN 75 AND 90;
+SELECT course_name AS names FROM courses
+UNION
+SELECT name FROM students;
+SELECT * FROM v_student_course;
+
+“ “ “
+
+“ “ “
+DROP DATABASE IF EXISTS college_db;
+CREATE DATABASE college_db;
+USE college_db;
+CREATE TABLE courses(
+course_id INT PRIMARY KEY AUTO_INCREMENT,
+course_name VARCHAR(50) NOT NULL UNIQUE,
+duration VARCHAR(20),
+fees DECIMAL(10,2)
+);
+CREATE TABLE students(
+student_id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(50) NOT NULL,
+age INT CHECK(age>0),
+marks INT,
+course_id INT,
+CONSTRAINT fk_course FOREIGN KEY(course_id) REFERENCES courses(course_id)
+);
+INSERT INTO courses(course_name,duration,fees) VALUES
+('Artificial Intelligence','6 months',15000),
+('Data Science','8 months',18000),
+('Web Development','5 months',12000),
+('Cyber Security','7 months',16000);
+INSERT INTO students(name,age,marks,course_id) VALUES
+('Asha Patil',20,85,1),
+('Rohit More',21,78,2),
+('Sneha Khan',19,92,3),
+('Karan Patil',20,67,1),
+('Meera Joshi',22,88,2),
+('Pratik Desai',23,76,4);
+CREATE VIEW v_student_course AS
+SELECT s.student_id,s.name,s.age,s.marks,c.course_name,c.duration,c.fees
+FROM students s JOIN courses c ON s.course_id=c.course_id;
+SELECT s.name,c.course_name
+FROM students s
+INNER JOIN courses c ON s.course_id=c.course_id;
+SELECT s.name,c.course_name
+FROM students s
+LEFT JOIN courses c ON s.course_id=c.course_id;
+SELECT s.name,c.course_name
+FROM students s
+RIGHT JOIN courses c ON s.course_id=c.course_id;
+SELECT s.name,c.course_name
+FROM students s
+LEFT JOIN courses c ON s.course_id=c.course_id
+UNION
+SELECT s.name,c.course_name
+FROM students s
+RIGHT JOIN courses c ON s.course_id=c.course_id;
+SELECT s.name,c.course_name
+FROM students s
+CROSS JOIN courses c;
+SELECT a.name AS student,b.name AS classmate,c.course_name
+FROM students a
+JOIN students b ON a.course_id=b.course_id AND a.student_id<>b.student_id
+JOIN courses c ON a.course_id=c.course_id
+ORDER BY c.course_name;
+SELECT name,marks
+FROM students
+WHERE course_id IN (SELECT course_id FROM courses WHERE fees>15000);
+SELECT s.name,s.marks
+FROM students s
+WHERE s.marks > (SELECT AVG(marks) FROM students WHERE course_id=s.course_id);
+SELECT s.name,c.course_name
+FROM students s
+JOIN courses c ON s.course_id=c.course_id
+WHERE EXISTS (SELECT 1 FROM courses WHERE duration='8 months' AND course_id=s.course_id);
+SELECT * FROM v_student_course;
+ 
+“ “ “
